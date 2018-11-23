@@ -15,19 +15,15 @@ class ExcelToXmlComponent
     public function exportToXml()
     {
         $excelAsArray = $this->getExcelAsArray();
-        if (\Yii::$app->session->get(self::XML_APPEND_DATA)){
-            trace(111);
-        }
-        else{
-            trace(222);
-        }
+        trace($excelAsArray, 1);
+
     }
 
     protected function getExcelAsArray()
     {
         $reader = new \PhpOffice\PhpSpreadsheet\Reader\Xlsx();
         $reader->setReadDataOnly(true);
-        $spreadsheet = $reader->load($this->filePath);
+        $spreadsheet = $reader->load($this->excelFilePath);
         return $spreadsheet->getActiveSheet()->toArray();
     }
 }

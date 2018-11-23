@@ -67,7 +67,6 @@ class SiteController extends Controller
             $model->file = UploadedFile::getInstance($model, 'file');
             if ($model->upload()) {
                 (new ExcelToXmlComponent($model->getPath()))->exportToXml();
-                Yii::$app->session->set(ExcelToXmlComponent::XML_APPEND_DATA, true);
             }
         }
 
