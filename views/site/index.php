@@ -1,13 +1,16 @@
 <?php
 
-/* @var $this yii\web\View */
+/**
+ * @var $this yii\web\View
+ * @var bool showDownloadBtn
+ */
 
 $this->title = 'Excel to Xml';
 ?>
 <div class="site-index">
     <?php
     $form = \yii\widgets\ActiveForm::begin([
-    'id' => 'login-form',
+    'id' => 'upload-form',
     'options' => ['class' => 'form-horizontal', 'enctype' => 'multipart/form-data'],
     ]) ?>
     <?= $form->field($model, 'file')->fileInput() ?>
@@ -18,4 +21,13 @@ $this->title = 'Excel to Xml';
         </div>
     </div>
     <?php \yii\widgets\ActiveForm::end() ?>
+</div>
+<form action="<?= \yii\helpers\Url::to(['refresh']);?>">
+    <?= \yii\helpers\Html::submitButton('Сбросить', ['class' => 'btn btn-danger']) ?>
+</form>
+<?php if ($showDownloadBtn):?>
+    <form action="<?= \yii\helpers\Url::to(['download']);?>">
+        <?= \yii\helpers\Html::submitButton('Скачать XML', ['class' => 'btn btn-info']) ?>
+    </form>
+<?php endif;?>
 </div>

@@ -3,15 +3,13 @@
 namespace app\controllers;
 
 use app\components\ExcelToXmlComponent;
+use app\components\XmlComponent;
 use app\models\FileForm;
-use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use Yii;
 use yii\filters\AccessControl;
+use yii\helpers\Url;
 use yii\web\Controller;
-use yii\web\Response;
 use yii\filters\VerbFilter;
-use app\models\LoginForm;
-use app\models\ContactForm;
 use yii\web\UploadedFile;
 
 class SiteController extends Controller
@@ -66,10 +64,26 @@ class SiteController extends Controller
         if (Yii::$app->request->isPost) {
             $model->file = UploadedFile::getInstance($model, 'file');
             if ($model->upload()) {
-                (new ExcelToXmlComponent($model->getPath()))->exportToXml();
+                if ((new ExcelToXmlComponent($model->getPath()))->exportToXml()){
+                    Yii::$app->session->setFlash('success', 'Успешно обработано');
+                }
+                else{
+                    Yii::$app->session->setFlash('error', 'Ошибка обработки');
+                }
             }
         }
 
-        return $this->render('index', compact('model'));
+        $showDownloadBtn = (new XmlComponent())->isFileExists();
+
+        return $this->render('index', compact('model', 'showDownloadBtn'));
+    }
+
+    public function actionDownload(){
+        (new XmlComponent())->getFile();
+    }
+
+    public function actionRefresh(){
+        (new XmlComponent())->refresh();
+        return $this->redirect(Url::previous());
     }
 }

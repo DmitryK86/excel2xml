@@ -1,6 +1,8 @@
 <?php
 namespace app\components;
 
+use yii\web\NotFoundHttpException;
+
 /**
  * Class XmlComponent
  * @package app\components
@@ -12,36 +14,105 @@ class XmlComponent
 	protected $tags;
 	protected $tagsData;
 
-	protected $path = 'uploads/xml/';
-	protected $completedFilesPath = 'uploads/xml/completed/';
+	protected $offerAttributes = ['offer available', 'id'];
+
+	protected $path = 'outputs/xml/';
 	protected $filename = 'offers.xml';
 
-	public function __construct($tags, $tagsData)
+	public function __construct()
 	{
 		if (!is_dir($this->path)){
-			mkdir($this->path, self::MODE, true);
+			mkdir($this->path);
+			chmod($this->path, self::MODE);
 		}
-		if (!is_dir($this->completedFilesPath)){
-			mkdir($this->completedFilesPath, self::MODE, true);
-		}
-
-		$this->tags = $this->prepareTags($tags);
-		$this->tagsData = $tagsData;
 	}
 
-	public function createXml()
+	public function export($excelDataAsArray)
 	{
-		file_exists($this->path . $this->filename) ? $this->addToExist() : $this->createNew();
+        $tags = array_shift($excelDataAsArray);
+        $this->prepareTags($tags);
+        $this->tagsData = $excelDataAsArray;
+
+		return $this->isFileExists() ? $this->addToExist() : $this->createNew();
 	}
+
+	public function getFile(){
+        if(file_exists($this->path . $this->filename)){
+            return \Yii::$app->response->sendFile($this->path . $this->filename, $this->filename,['Content-Type'=>'text/xml']);
+        }else{
+            throw new NotFoundHttpException('Такого файла не существует ');
+        }
+    }
+
+    public function refresh(){
+        if(file_exists($this->path . $this->filename)){
+            unlink($this->path . $this->filename);
+        }
+    }
+
+    public function isFileExists(){
+        return file_exists($this->path . $this->filename);
+    }
 
 	protected function prepareTags($tags)
 	{
+        foreach ($tags as $key => $tag){
+            if (in_array($tag, $this->offerAttributes)){
+                unset($tags[$key]);
+            }
+        }
 
+        $this->tags = array_map(function ($value){
+            return explode(' ', $value);
+        }, $tags);
 	}
 
-	protected function getCore()
+	protected function addToExist(){
+	    $xmlStr = file_get_contents($this->path . $this->filename);
+        $xml = new \SimpleXMLElement($xmlStr);
+        $this->addOffers($xml->shop->offers);
+
+        return $xml->saveXML($this->path . $this->filename);
+    }
+
+	protected function createNew()
+    {
+	    $xml = $this->getXml();
+	    $offersElement = $xml->shop->addChild('offers');
+        $this->addOffers($offersElement);
+
+        return $xml->saveXML($this->path . $this->filename);
+    }
+
+    protected function addOffers(\SimpleXMLElement $offersElement){
+        foreach ($this->tagsData as $tagData){
+            $offer = $offersElement->addChild('offer');
+            $offer->addAttribute('available', $tagData[0]);
+            $offer->addAttribute('id', $tagData[1]);
+            unset($tagData[0], $tagData[1]);
+
+            foreach ($this->tags as $key => $tag){
+                if (count($tag) > 1){
+                    $elem = $offer->addChild($tag[0], $tagData[$key]);
+                    $attrs = explode('="', $tag[1]);
+                    $elem->addAttribute($attrs[0], $attrs[1]);
+                }
+                elseif (in_array('picture', $tag)){
+                    $urls = explode(PHP_EOL, $tagData[$key]);
+                    foreach ($urls as $url){
+                        $offer->addChild($tag[0], $url);
+                    }
+                }
+                else{
+                    $offer->addChild($tag[0], $tagData[$key]);
+                }
+            }
+        }
+    }
+
+	protected function getXml()
 	{
-		return <<<XML
+		$xml = <<<XML
 <?xml version='1.0' encoding="UTF-8"?>
 <yml_catalog date="2011-07-20 14:58">
 <shop>
@@ -86,5 +157,6 @@ class XmlComponent
 </yml_catalog>
 XML;
 
+		return new \SimpleXMLElement($xml);
 	}
 }

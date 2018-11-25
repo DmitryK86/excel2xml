@@ -15,8 +15,7 @@ class ExcelToXmlComponent
     public function exportToXml()
     {
         $excelAsArray = $this->getExcelAsArray();
-        trace($excelAsArray, 1);
-
+        return (new XmlComponent())->export($excelAsArray);
     }
 
     protected function getExcelAsArray()

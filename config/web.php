@@ -58,6 +58,8 @@ $config = [
             'enablePrettyUrl' => true,
             'showScriptName' => false,
             'rules' => [
+                'download' => 'site/download',
+                'refresh' => 'site/refresh',
             ],
         ],
 
