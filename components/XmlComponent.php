@@ -9,7 +9,7 @@ use yii\web\NotFoundHttpException;
  */
 class XmlComponent
 {
-	const MODE = '0777';
+	const MODE = 0777;
 
 	protected $tags;
 	protected $tagsData;
@@ -22,8 +22,7 @@ class XmlComponent
 	public function __construct()
 	{
 		if (!is_dir($this->path)){
-			mkdir($this->path);
-			chmod($this->path, self::MODE);
+			mkdir($this->path, self::MODE, true);
 		}
 	}
 
@@ -46,8 +45,10 @@ class XmlComponent
 
     public function refresh(){
         if(file_exists($this->path . $this->filename)){
-            unlink($this->path . $this->filename);
+            return unlink($this->path . $this->filename);
         }
+
+        return false;
     }
 
     public function isFileExists(){

@@ -83,7 +83,12 @@ class SiteController extends Controller
     }
 
     public function actionRefresh(){
-        (new XmlComponent())->refresh();
+        if ((new XmlComponent())->refresh()){
+	        Yii::$app->session->setFlash('success', 'Успешно сброшено');
+        }
+        else{
+	        Yii::$app->session->setFlash('error', 'Ошибка очистки данных');
+        }
         return $this->redirect(Url::previous());
     }
 }

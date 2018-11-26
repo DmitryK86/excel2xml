@@ -7,6 +7,11 @@
 
 $this->title = 'Excel to Xml';
 ?>
+<style>
+    button {
+        margin-bottom: 5px !important;
+    }
+</style>
 <div class="site-index">
     <?php
     $form = \yii\widgets\ActiveForm::begin([
@@ -14,12 +19,7 @@ $this->title = 'Excel to Xml';
     'options' => ['class' => 'form-horizontal', 'enctype' => 'multipart/form-data'],
     ]) ?>
     <?= $form->field($model, 'file')->fileInput() ?>
-
-    <div class="form-group">
-        <div class="col-lg-offset-1 col-lg-11">
-            <?= \yii\helpers\Html::submitButton('Загрузить', ['class' => 'btn btn-primary']) ?>
-        </div>
-    </div>
+    <?= \yii\helpers\Html::submitButton('Загрузить и обработать', ['class' => 'btn btn-primary']) ?>
     <?php \yii\widgets\ActiveForm::end() ?>
 </div>
 <form action="<?= \yii\helpers\Url::to(['refresh']);?>">
