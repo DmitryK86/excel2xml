@@ -73,7 +73,7 @@ class XmlComponent
         $xml = new \SimpleXMLElement($xmlStr);
         $this->addOffers($xml->shop->offers);
 
-        return $xml->saveXML($this->path . $this->filename);
+        return $this->save($xml);
     }
 
 	protected function createNew()
@@ -82,7 +82,7 @@ class XmlComponent
 	    $offersElement = $xml->shop->addChild('offers');
         $this->addOffers($offersElement);
 
-        return $xml->saveXML($this->path . $this->filename);
+	    return $this->save($xml);
     }
 
     protected function addOffers(\SimpleXMLElement $offersElement){
@@ -159,5 +159,14 @@ class XmlComponent
 XML;
 
 		return new \SimpleXMLElement($xml);
+	}
+
+	protected function save(\SimpleXMLElement $simpleXml){
+		$dom = new \DOMDocument("1.0");
+		$dom->preserveWhiteSpace = false;
+		$dom->formatOutput = true;
+		$dom->loadXML($simpleXml->asXML());
+
+		return file_put_contents($this->path . $this->filename, $dom->saveXML()) !== false;
 	}
 }
